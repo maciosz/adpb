@@ -53,9 +53,18 @@ class EpickiKonwerter:
 	def readFASTQ( self, filename ):
 		lines = open( filename ).readlines()
 		for i in xrange( 0, len(lines), 4 ):
-			self.descriptions.append( lines[i][1:] )
-			self.sequences.append( lines[i+1] )
-			self.scores.append( lines[i+3] )
+			self.descriptions.append( lines[i][1:].strip() )
+			self.sequences.append( lines[i+1].strip() )
+			self.scores.append( lines[i+3].strip() )
+
+
+	def writeFASTQ( self, filename ):
+		output = open( filename, 'w' )
+		for i, sequence in enumerate( self.sequences ):
+			output.write( '@' + self.descriptions[i] + '\n' )
+			output.write( sequence + '\n' )
+			output.write( '+\n' )
+			output.write( self.scores[i] + '\n' )
 
 
 
@@ -135,3 +144,4 @@ class EpickiKonwerter:
 				if self.quality: quality = self.quality[i]
 				if self.descriptions: tags = self.descriptions[i]
 				writer.writerow([seqID, '*', ref, start, 	mapq, cigar, '*', '*', '*', self.sequences[i], quality, tags])
+				
