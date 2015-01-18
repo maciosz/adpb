@@ -50,6 +50,15 @@ class EpickiKonwerter:
 			output.write('\n')
 
 
+	def readFASTQ( self, filename ):
+		lines = open( filename ).readlines()
+		for i in xrange( 0, len(lines), 4 ):
+			self.descriptions.append( lines[i][1:] )
+			self.sequences.append( lines[i+1] )
+			self.scores.append( lines[i+3] )
+
+
+
 
 	def readSAM( self, filename ):
 	"""Method for reading sequence data from .sam files."""
