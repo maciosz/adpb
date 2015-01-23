@@ -70,37 +70,40 @@ class EpickiKonwerter:
 
 
 	def readSAM( self, filename ):
-	"""Method for reading sequence data from .sam files."""
+		"""Method for reading sequence data from .sam files."""
 		for line in open( filename ).readlines():
 			col = line.strip().split( '\t' )
 
 			#this is a header section
 			if line.startswith( '@' ):
-				tmp = dict( pair.split( ':', 1 ) for pair in col[1:] )
 				if col[0] == '@HD':
 					#nothing to remember really
+					pass
 						
 				elif col[0] == '@SQ':
 					#metadata on reference sequences
-					uri = ''
-					if 'UR' in tmp.keys(): uri = tmp['UR']
-					references[tmp['SN']] = uri
-					refLens[tmp['SN']] = tmp['LN']
+					tmp = dict( pair.split( ':', 1 ) for pair in col[1:] )
+					if 'UR' in tmp:
+						self.refURIs[tmp['SN']] = tmp['UR']
+					self.refLens[tmp['SN']] = tmp['LN']
 						
 				elif col[0] == '@RG':
 					#metadata on read groups
+					pass
 
 				elif col[0] == '@PG':
 					#metadata on aligning program
+					pass
 
 				elif col[0] == '@CO':
 					#additional comments
+					pass
 
 			else:
 				self.seqIDs.append( col[0] )
 				self.references.append( col[2] )
 				self.starts.append( col[3] )
-				self.ends.append( max( [sum( [int( i ) for i in re.findall( '\d+', col[5] )]+[0] ), len( col[9] )] ) )
+				self.stops.append( max( [sum( [int( i ) for i in re.findall( '\d+', col[5] )]+[0] ), len( col[9] )] ) )
 				self.MAPQ.append( col[4] )
 				self.CIGAR.append( col[5] )
 				self.sequences.append( col[9] )
@@ -109,23 +112,24 @@ class EpickiKonwerter:
 
 
 	def writeSAM( self, filename ):
-	"""Method for writing sequence data in SAM format."""
+		"""Method for writing sequence data in SAM format."""
 		with open( filename, 'w' ) as out:
 			writer = csv.writer( out, delimiter='\t' )
 
-			writer.writerow( ['@HD\tVN:1.0\tSO:unknown'] )
+			writer.writerow( ['@HD', 'VN:1.0', 'SO:unknown'] )
 
 			refIDs = set( self.refLens.keys() ).union( \
-				 set( self.refURIs.keys() )
+				 set( self.refURIs.keys() ) )
 			for refID in refIDs:
 				row = ['@SQ']
-				if refID in refLens:
+				row.append( 'SN:'+refID )
+				if refID in self.refLens:
 					row.append( 'LN:'+self.refLens[refID] )
 				else:
 					row.append( 'LN:*' )
-				if refID in refURIs:
+				if refID in self.refURIs:
 					row.append( 'UR:'+self.refURIs[refID] )
-					writer.writerow( row )
+				writer.writerow( row )
 
 			writer.writerow( ['@PG', 'ID:EpickiKonwerter', 'VN:0.0.0.0.0.0.0.0.1'] )
 
@@ -148,46 +152,46 @@ class EpickiKonwerter:
 
 
 	def filterSAM( self, infilename, outfilename, expression ):
-	"""Method for filtering out entries from .sam files meeting
-	criteria in a given expression."""
+		"""Method for filtering out entries from .sam files
+		meeting criteria in a given expression."""
 		with open( outfilename, 'w' ) as out:
-			for line in open( filename ).readlines():
+			for line in open( infilename ).readlines():
 				col = line.strip().split( '\t' )
 
 				#header is not filtered
-				if !line.startswith( '@' ):
+				if not line.startswith( '@' ):
 					QNAME = col[0]
-					FLAG = col[1]
+					FLAG = int(col[1])
 					RNAME = col[2]
-					POS = col[3]
-					MAPQ = col[4]
+					POS = int(col[3])
+					MAPQ = int(col[4])
 					CIGAR = col[5]
 					MRNM = RNEXT = col[6]
 					MPOS = PNEXT = col[7]
-					ISIZE = TLEN = col[8]
+					ISIZE = TLEN = int(col[8])
 					SEQ = col[9]
 					QUAL = col[10]
 
 					#if condition is not met drop the line
-					if !eval( expression ):
-						continue:
+					if not eval( expression ):
+						continue
 
 				out.write( line )
 
 
 	def splitSAM( self, infilename ):
-	"""Method for splitting .sam files by reference ids."""
+		"""Method for splitting .sam files by reference ids."""
 		outs = {}
 		seqIDs = {}
 		seqNo = {}
 		count = 1
 		common_header = ''
-		basename = infilename.split( '.' )[:-1]
+		basename = infilename.split( '.sam' )[0]
 
 		for line in open( infilename ).readlines():
 			col = line.strip().split( '\t' )
 
-			if line.startwith( '@' ):
+			if line.startswith( '@' ):
 
 				if col[0] == '@SQ':
 					tmp = dict( pair.split( ':', 1 ) for pair in col[1:] )
@@ -195,16 +199,19 @@ class EpickiKonwerter:
 					seqNo[tmp['SN']] = count
 					count += 1
 				else:
-					common_header.append( line )
+					common_header = common_header + line
 			else:
 				if not outs:
 					seqNo[''] = count
-					seqIDs[''] = ''
-					outs = dict( (key, open( basename+str(value)+'.sam', 'w' )) for key, value in seqNo.items() )
-					outs['*'] = outs['']
-
+					seqIDs[''] = seqIDs['*'] = ''
+					outs = dict( (key, open( basename+'_'+str(value)+'.sam', 'w' )) for key, value in seqNo.items() )
 					for key, out in outs.items():
 						out.write( common_header )
 						out.write( seqIDs[key] )
 
+					outs['*'] = outs['']
+
 				outs[col[2]].write( line )
+
+		for out in outs.values():
+			out.close()
