@@ -144,4 +144,30 @@ class EpickiKonwerter:
 				if self.quality: quality = self.quality[i]
 				if self.descriptions: tags = self.descriptions[i]
 				writer.writerow([seqID, '*', ref, start, 	mapq, cigar, '*', '*', '*', self.sequences[i], quality, tags])
-				
+
+	def filterSAM( self, infilename, outfilename, expression ):
+	"""Method for filtering out sequences shorter than given length from
+	.sam files."""
+		with open( outfilename, 'w' ) as out:
+			for line in open( filename ).readlines():
+				col = line.strip().split('\t')
+
+				#header is not filtered
+				if !line[0].startswith('@'):
+					QNAME = col[1]
+					FLAG = col[2]
+					RNAME = col[3]
+					POS = col[4]
+					MAPQ = col[5]
+					CIGAR = col[6]
+					MRNM = RNEXT = col[7]
+					MPOS = PNEXT = col[8]
+					ISIZE = TLEN = col[9]
+					SEQ = col[10]
+					QUAL = col[11]
+
+					#if condition is not met drop the line
+					if !eval( expression ):
+						continue:
+
+				out.write( line )
