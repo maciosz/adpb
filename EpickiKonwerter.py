@@ -72,61 +72,62 @@ class EpickiKonwerter:
 	def readSAM( self, filename ):
 	"""Method for reading sequence data from .sam files."""
 		for line in open( filename ).readlines():
-			line = line.strip().split('\t')
+			col = line.strip().split( '\t' )
 
 			#this is a header section
-			if line[0].startswith('@'):
-				tmp = dict(pair.split(':', 1) for pair in line[1:])
-				if line[0] == '@HD':
+			if line.startswith( '@' ):
+				tmp = dict( pair.split( ':', 1 ) for pair in col[1:] )
+				if col[0] == '@HD':
 					#nothing to remember really
 						
-				elif line[0] == '@SQ':
+				elif col[0] == '@SQ':
 					#metadata on reference sequences
 					uri = ''
 					if 'UR' in tmp.keys(): uri = tmp['UR']
 					references[tmp['SN']] = uri
 					refLens[tmp['SN']] = tmp['LN']
 						
-				elif line[0] == '@RG':
+				elif col[0] == '@RG':
 					#metadata on read groups
 
-				elif line[0] == '@PG':
+				elif col[0] == '@PG':
 					#metadata on aligning program
 
-				elif line[0] == '@CO':
+				elif col[0] == '@CO':
 					#additional comments
 
 			else:
-				self.seqIDs.append(line[0])
-				self.references.append(line[2])
-				self.starts.append(line[3])
-				self.ends.append(max([sum([int(i) for i in re.findall('\d+', c)]+[0]), len(line[9])]))
-				self.MAPQ.append(line[4])
-				self.CIGAR.append(line[5])
-				self.sequences.append(line[9])
-				self.quality.append(line[10])
-				self.descriptions.append(line[11])
+				self.seqIDs.append( col[0] )
+				self.references.append( col[2] )
+				self.starts.append( col[3] )
+				self.ends.append( max( [sum( [int( i ) for i in re.findall( '\d+', col[5] )]+[0] ), len( col[9] )] ) )
+				self.MAPQ.append( col[4] )
+				self.CIGAR.append( col[5] )
+				self.sequences.append( col[9] )
+				self.quality.append( col[10] )
+				self.descriptions.append( col[11] )
+
 
 	def writeSAM( self, filename ):
 	"""Method for writing sequence data in SAM format."""
 		with open( filename, 'w' ) as out:
-			writer = csv.writer(out, delimiter='\t')
+			writer = csv.writer( out, delimiter='\t' )
 
-			writer.writerow(['@HD\tVN:1.0\tSO:unknown'])
+			writer.writerow( ['@HD\tVN:1.0\tSO:unknown'] )
 
-			refIDs = set(self.refLens.keys()).union( \
-				 set(self.refURIs.keys())
+			refIDs = set( self.refLens.keys() ).union( \
+				 set( self.refURIs.keys() )
 			for refID in refIDs:
 				row = ['@SQ']
 				if refID in refLens:
-					row.append('LN:'+self.refLens[refID])
+					row.append( 'LN:'+self.refLens[refID] )
 				else:
-					row.append('LN:*')
+					row.append( 'LN:*' )
 				if refID in refURIs:
-					row.append('UR:'+self.refURIs[refID])
-					writer.writerow(row)
+					row.append( 'UR:'+self.refURIs[refID] )
+					writer.writerow( row )
 
-			writer.writerow(['@PG', 'ID:EpickiKonwerter', 'VN:0.0.0.0.0.0.0.0.1'])
+			writer.writerow( ['@PG', 'ID:EpickiKonwerter', 'VN:0.0.0.0.0.0.0.0.1'] )
 
 			ref = '*'
 			start = '*'
@@ -134,7 +135,7 @@ class EpickiKonwerter:
 			cigar = '*'
 			quality = '*'
 			tags = ''
-			for i in xrange(len(self.sequences)):
+			for i in xrange( len( self.sequences ) ):
 				if self.seqIDs: seqID = self.seqIDs[i]
 				else: seqID = 'seq%d' % i
 				if self.references: ref = self.references[i]
@@ -143,31 +144,67 @@ class EpickiKonwerter:
 				if self.CIGAR: cigar = self.CIGAR[i]
 				if self.quality: quality = self.quality[i]
 				if self.descriptions: tags = self.descriptions[i]
-				writer.writerow([seqID, '*', ref, start, 	mapq, cigar, '*', '*', '*', self.sequences[i], quality, tags])
+				writer.writerow( [seqID, '*', ref, start, 	mapq, cigar, '*', '*', '*', self.sequences[i], quality, tags] )
+
 
 	def filterSAM( self, infilename, outfilename, expression ):
-	"""Method for filtering out sequences shorter than given length from
-	.sam files."""
+	"""Method for filtering out entries from .sam files meeting
+	criteria in a given expression."""
 		with open( outfilename, 'w' ) as out:
 			for line in open( filename ).readlines():
-				col = line.strip().split('\t')
+				col = line.strip().split( '\t' )
 
 				#header is not filtered
-				if !line[0].startswith('@'):
-					QNAME = col[1]
-					FLAG = col[2]
-					RNAME = col[3]
-					POS = col[4]
-					MAPQ = col[5]
-					CIGAR = col[6]
-					MRNM = RNEXT = col[7]
-					MPOS = PNEXT = col[8]
-					ISIZE = TLEN = col[9]
-					SEQ = col[10]
-					QUAL = col[11]
+				if !line.startswith( '@' ):
+					QNAME = col[0]
+					FLAG = col[1]
+					RNAME = col[2]
+					POS = col[3]
+					MAPQ = col[4]
+					CIGAR = col[5]
+					MRNM = RNEXT = col[6]
+					MPOS = PNEXT = col[7]
+					ISIZE = TLEN = col[8]
+					SEQ = col[9]
+					QUAL = col[10]
 
 					#if condition is not met drop the line
 					if !eval( expression ):
 						continue:
 
 				out.write( line )
+
+
+	def splitSAM( self, infilename ):
+	"""Method for splitting .sam files by reference ids."""
+		outs = {}
+		seqIDs = {}
+		seqNo = {}
+		count = 1
+		common_header = ''
+		basename = infilename.split( '.' )[:-1]
+
+		for line in open( infilename ).readlines():
+			col = line.strip().split( '\t' )
+
+			if line.startwith( '@' ):
+
+				if col[0] == '@SQ':
+					tmp = dict( pair.split( ':', 1 ) for pair in col[1:] )
+					seqIDs[tmp['SN']] = line
+					seqNo[tmp['SN']] = count
+					count += 1
+				else:
+					common_header.append( line )
+			else:
+				if not outs:
+					seqNo[''] = count
+					seqIDs[''] = ''
+					outs = dict( (key, open( basename+str(value)+'.sam', 'w' )) for key, value in seqNo.items() )
+					outs['*'] = outs['']
+
+					for key, out in outs.items():
+						out.write( common_header )
+						out.write( seqIDs[key] )
+
+				outs[col[2]].write( line )
