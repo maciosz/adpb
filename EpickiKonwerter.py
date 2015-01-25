@@ -224,3 +224,175 @@ class EpickiKonwerter:
 
 		for out in outs.values():
 			out.close()
+
+
+	def open_file(self, filename):
+		"""
+		Opens a file.
+		"""
+		file1 = open(filename, "r")
+		try: 
+			data = file1.readlines()
+		except IOError:
+			print "Error occured during reading a file.\n"
+		finally:
+			file1.close()
+    
+		return data
+      
+      
+	def save_file(self, filename, content):
+		"""
+		Writes a given content to a file.
+		"""
+		file1 = open(filename, "w")
+		try: 
+			file1.writelines(content)
+		except IOError:
+			print "Error occured during writing to file.\n"
+		finally:
+			file1.close()    
+  
+
+	def readGFF2_GFF3(self, filename):
+		"""
+		Reads file in gff2 or gff3 format.
+		"""
+		data = self.open_file(filename)    
+        
+		for i in data:
+			if i.startswith("#"):
+				self.headline.append(i)
+			else:
+				line = i.strip().split("\t")
+	    
+				self.seqIDs.append(line[0])
+				self.sources.append(line[1])
+				self.methods.append(line[2])
+				self.starts.append(line[3])
+				self.stops.append(line[4])
+				if (line[5] == ".") or (float(line[5]) <= 1000) and (float(line[5]) > 0):
+					self.scores.append(line[5])
+				if (line[6] == "+") or (line[6] == "-") or (line[6] == "."):
+					 self.strands.append(line[6])
+				if (line[7] == "0") or (line[7] == "1") or (line[7] == "2") or (line[7] == "."):
+					 self.phases.append(line[7])
+            
+				temp = []
+				 for j in range(8, len(line)):
+					if self.headline[0] == "##gff-version 3\n":
+						line[j] = line[j].split("=")
+					else:
+						line[j] = line[j].split(" ")
+					for k in range(len(line[j])):
+						if re.search(";", line[j][k]) != None:
+							temp = line[j][k].split(";") 
+							line[j].pop(k)
+							line[j].insert(k, temp[0] + ";")
+							line[j].insert(k+1, temp[1])
+							temp = []
+					for l in range(len(line[j])):
+						if line[j][l].startswith(r"\""):    
+							line[j][l] = line[j][l].translate(None, "\"")
+	            
+					not_empty = filter(None, line[j])
+					self.group_gff.append(not_empty)
+			line = []
+            
+		self.headline.pop(0)
+        
+
+	def writeGFF2(self, filename):
+		"""
+		Writes file in gff2 file format.
+		"""
+		out = []
+		verse = [self.seqIDs, self.sources, self.methods, self.starts, self.stops, self.scores, self.strands, self.phases, self.group_gff]
+		SOFA_ids = [ "SO:0000704", "SO:0000234", "SO:0000147", "SO:0000316", "SO:0000188", "SO:0000610", "SO:0000553", "SO:0000204", "SO:0000205"]
+		types_gff3 = ["gene", "mRNA", "exon", "cds", "intron", "polyA", "polyA", "five", "three"]
+		line = ""
+		out.append("##gff-version 2\n")
+		if self.headline != []:
+			for k in self.headline:
+				out.append(k)
+		for i in range(len(self.seqIDs)):
+			for j in range(len(verse)):
+				if j == 2 and (re.search("SO:", verse[j][i]) != None): #self.methods
+					for l in range(len(SOFA_ids)):
+						if verse[j][i] == SOFA_ids[l]:
+							line += types_gff3[l] + "\t"
+				elif j == 8: # self.group_gff
+					for k in range(len(self.group_gff[i])):
+						if self.group_gff[i][k-1].endswith(";") and k != 0:
+							if (re.search(" ", self.group_gff[i][k+1]) != None) or (re.search("_", self.group_gff[i][k+1]) != None):
+								self.group_gff[i][k+1] = "\"" + self.group_gff[i][k+1] + "\""
+						line += self.group_gff[i][k] + " "
+				 else:
+					line += verse[j][i] + "\t"
+
+			out.append(line+"\n")
+			line = ""
+        
+		self.save_file(filename, out)
+        
+	    
+	def writeGFF3(self, filename):
+		"""
+		 Writes file in gff3 file format.
+		"""
+		out = []
+		verse = [self.seqIDs, self.sources, self.methods, self.starts, self.stops, self.scores, self.strands, self.phases, self.group_gff]
+        
+		out.append("##gff-version 3\n")
+		if self.headline != []:
+			for k in self.headline:
+				out.append(k)
+        
+		line = ""
+		for i in range(len(self.seqIDs)):
+			for j in range(len(verse)):
+				if j == 8:
+					for k in range(len(self.group_gff[i])):
+						if k == 0 or self.group_gff[i][k-1].endswith(";"):
+							if self.group_gff[i][k] == "ID" or \
+							   self.group_gff[i][k] == "Name" or \
+							   self.group_gff[i][k] == "Alias" or \
+							   self.group_gff[i][k] == "Parent" or \
+							   self.group_gff[i][k] == "Target" or \
+							   self.group_gff[i][k] == "Gap" or \
+							   self.group_gff[i][k] == "Derives_from" or \
+							   self.group_gff[i][k] == "Note" or \
+							   self.group_gff[i][k] == "Dbxref" or \
+							   self.group_gff[i][k] == "Ontology_term" or \
+							   self.group_gff[i][k] == "Is_circular" :
+								line += self.group_gff[i][k] + "="
+							else:
+								line += "Note="
+						else:
+							line += self.group_gff[i][k]
+				else:
+					line += verse[j][i] + "\t"
+
+			out.append(line+"\n")
+			line = ""
+        
+		self.save_file(filename, out)
+
+    
+	def filterGFF(self, filename_in, filename_out, column, value):
+		"""
+		Simple filter.
+		"""
+		data = self.open_file(filename_in)
+		out = [] 
+		line = ""
+              
+		for i in data:
+			if i.startswith("#"):
+				out.append(i)
+			else:
+				line = i.strip().split("\t") 
+				if line[column-1] == value:
+					out.append(i)
+        
+		self.save_file(filename_out, out)
