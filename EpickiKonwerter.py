@@ -72,6 +72,9 @@ class EpickiKonwerter:
 	def readSAM( self, filename ):
 		"""Method for reading sequence data from .sam files."""
 		for line in open( filename ).readlines():
+			if line.strip() != '':
+				continue
+
 			col = line.strip().split( '\t' )
 
 			#this is a header section
@@ -156,6 +159,9 @@ class EpickiKonwerter:
 		meeting criteria in a given expression."""
 		with open( outfilename, 'w' ) as out:
 			for line in open( infilename ).readlines():
+				if line.strip() != '':
+					continue
+
 				col = line.strip().split( '\t' )
 
 				#header is not filtered
@@ -189,6 +195,9 @@ class EpickiKonwerter:
 		basename = infilename.split( '.sam' )[0]
 
 		for line in open( infilename ).readlines():
+			if line.strip() != '':
+				continue
+
 			col = line.strip().split( '\t' )
 
 			if line.startswith( '@' ):
