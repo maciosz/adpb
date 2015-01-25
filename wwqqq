@@ -1,0 +1,77 @@
+[33mcommit c4f51819d722805f9e518db528692a045aa36eaa[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Sun Jan 25 21:18:13 2015 +0100
+
+    SAM handling blank lines
+
+[33mcommit 8170d21eee207ff9782613259c4f6896c38dcec1[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Fri Jan 23 16:05:09 2015 +0100
+
+    SAM bugfixes
+
+[33mcommit b3a2431b68cdc5d4d5e9c764ef40f708d3db51e5[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Fri Jan 23 13:05:08 2015 +0100
+
+    SAM spliting
+
+[33mcommit 971a9a6262d61383a27b368ad0dd3b7efb527a57[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Fri Jan 23 10:46:54 2015 +0100
+
+    SAM generic filter
+
+[33mcommit d5e5fe82e8b0deb9b042d7eee9b6b2d0d3ec15b0[m
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Sun Jan 18 23:04:41 2015 +0100
+
+    writeFASTQ()
+
+[33mcommit 500134cf65c7e0a660a58826a984cc685731945f[m
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Sun Jan 18 22:57:01 2015 +0100
+
+    readFASTQ()
+
+[33mcommit 4b6d8ca887d87f6b14a844de303e53d42cfc95a6[m
+Merge: 062af8d a2532be
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Sun Jan 18 22:38:57 2015 +0100
+
+    frankly i have no idea what i'm doing here, trying to merge branches,
+    sorry if i make a mess
+    
+    Merge branch 'master' of https://github.com/maciosz/adpb
+
+[33mcommit 062af8d4caafb272a8f6901f021961a206af5a32[m
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Sun Jan 18 22:21:54 2015 +0100
+
+    writeFASTA() function
+
+[33mcommit a2532be5c347d841769bd1c649bfdb35303ee310[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Sun Jan 18 18:53:28 2015 +0100
+
+    Write SAM
+
+[33mcommit 1c442afcba2fcf4a86bf157e11e510c52eb992a2[m
+Author: Marcin Świstak <m.swistak@students.mimuw.edu.pl>
+Date:   Sun Jan 18 17:19:20 2015 +0100
+
+    Read SAM.
+
+[33mcommit 8ac6ac90c9d0aca2daa16dbf2d1c973fc9465222[m
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Thu Jan 15 21:27:45 2015 +0100
+
+    readFASTA() method
+    additional attribute 'descriptions'
+    changed attribute's names to plural
+
+[33mcommit 879d5a907f134b1c72b349c661d63b64fe187bcb[m
+Author: ania macioszek <a.macioszek@students.mimuw.edu.pl>
+Date:   Mon Jan 12 13:11:35 2015 +0100
+
+    class EpickiKonwerter; list of attributes

@@ -17,6 +17,7 @@ class EpickiKonwerter:
 		self.strands = []
 		self.phases = []
 		self.groups = []	# lista slownikow
+		self.group_gff = []
 		self.descriptions = []
 		self.MAPQ = []
 		self.CIGAR = []
