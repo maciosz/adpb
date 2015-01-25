@@ -1,0 +1,179 @@
+#!/usr/bin/python
+# GUI (jeszcze) bez opcji filtrowania 
+import EpickiKonwerter
+import sys
+import os
+from Tkinter import *
+from tkFileDialog import *
+
+if __name__ == "__main__":
+
+    class layout:
+    
+        def __init__(self, parent):
+
+# Choose Input format section.
+            self.frmIform = Frame(parent, bd=5)
+            self.frmIform.pack() 
+
+	    self.v = IntVar()
+	    self.v.set(1)  # Initializing the input choice
+
+            input_format = [
+		("fast",1),
+		("fastq",2),
+		("sam",3),
+		("gff2",4),
+		("gff3",5)]
+
+            def ShowChoice():
+                print self.v.get()
+
+            Label(self.frmIform, 
+		text="Choose input file format",
+		justify = LEFT,
+		padx = 20).pack()
+
+            for txt, val in input_format:
+		Radiobutton(root, 
+		text=txt,
+		padx = 20,
+		variable=self.v, 
+		command=ShowChoice,
+		value=val).pack(anchor=W)
+# Separator (start)
+            sep = Frame(parent, width=2, bd=2, bg='grey')
+            sep.pack(fill=X, expand=1)       
+# Separator (end)
+
+# Choose the output format section.
+            self.frmOform = Frame(parent, bd=5)
+            self.frmOform.pack() 
+
+            self.v2 = IntVar()
+            self.v2.set(1)  # Initializing the output choice
+
+            output_format = [
+		("fast",1),
+		("fastq",2),
+		("sam",3),
+		("gff2",4),
+		("gff3",5)]
+
+            def ShowChoice():
+                print self.v2.get()
+
+            Label(self.frmOform, 
+		text="Choose output file format", 
+		justify = LEFT,
+		padx = 20).pack()
+
+            for txt, val in output_format:
+                Radiobutton(root, 
+		text=txt,
+		padx = 20, 
+		variable=self.v2, 
+		command=ShowChoice,
+		value=val).pack(anchor=W)
+
+# Separator (start)
+            sep = Frame(parent, width=2, bd=2, bg='grey')
+            sep.pack(fill=X, expand=1)    
+# Separator (end)
+
+# Input file section.
+            self.frmInfile = Frame(parent, bd=5)         
+            self.frmInfile.pack()
+
+            self.labelIn = Label(self.frmInfile, text='Input File', width=15)
+            self.labelIn.pack(side=LEFT)
+
+            self.inFilePath = StringVar()
+            self.boxIn = Entry(self.frmInfile, width=22, textvariable=self.inFilePath)
+            self.boxIn.pack(side=LEFT)
+
+            self.bInFile = Button(self.frmInfile, text='Browse', command=self.bBrowseInClick)
+            self.bInFile.pack(side=LEFT)
+
+# Output file section.
+            self.frmOutfile = Frame(parent, bd=5)
+            self.frmOutfile.pack()
+
+            self.labelOut = Label(self.frmOutfile, text='Output File', width=15)
+            self.labelOut.pack(side=LEFT) 
+
+            self.outFilePath = StringVar()
+            self.boxOut = Entry(self.frmOutfile, width=22, textvariable=self.outFilePath)
+            self.boxOut.pack(side=LEFT) 
+
+            self.bOutFile = Button(self.frmOutfile, text='Browse', command=self.bBrowseOutClick)
+            self.bOutFile.pack(side=LEFT) 
+
+# Separator (start)
+            sep = Frame(parent, width=2, bd=2, bg='grey')
+            sep.pack(fill=X, expand=1)    
+# Separator (end)
+
+# "Convert" section
+            self.frmConv = Frame(parent, bd=5)
+            self.frmConv.pack()
+
+            self.bConverter = Button(self.frmConv, text='Convert', command=self.bConverterClick)
+            self.bConverter.pack() 
+
+# Browse input_file button
+        def bBrowseInClick(self):             
+            rFilepath = askopenfilename(
+		defaultextension='*', 
+		initialdir='.', 
+		initialfile='', 
+		parent=self.frmInfile, 	
+		title='select a file')
+            self.inFilePath.set(rFilepath)
+            print self.boxIn.get()
+
+# Browse output_file button    
+        def bBrowseOutClick(self):
+            rFilepath = asksaveasfilename(
+		defaultextension='*', 
+		initialdir='.', 
+		initialfile='', 
+		parent=self.frmInfile, 
+		title='select a file') 
+            self.outFilePath.set(rFilepath)
+            print self.boxOut.get()
+        
+# "Convert" button   
+        def bConverterClick(self):
+            inputFilePath = str(self.inFilePath.get())
+            outputFilePath = str(self.outFilePath.get())
+            e = EpickiKonwerter.EpickiKonwerter()
+# Input -> Converter
+            if self.v.get() == 1:
+                e.readFASTA(inputFilePath)
+            elif self.v.get() == 2:
+                e.readFASTQ(inputFilePath)
+            elif self.v.get() == 3:
+                e.readSAM(inputFilePath)
+            elif self.v.get() == 4:
+                e.readGFF2(inputFilePath)
+            elif self.v.get() == 5:
+                e.readGFF3(inputFilePath)
+# Converter -> Output
+            if self.v2.get() == 1:
+                e.writeFASTA(outputFilePath)
+            elif self.v2.get() == 2:
+                e.writeFASTQ(outputFilePath)
+            elif self.v2.get() == 3:
+                e.writeSAM(outputFilePath)
+            elif self.v2.get() == 4:
+                e.writeGFF2(outputFilePath)
+            elif self.v2.get() == 5:
+                e.writeGFF3(outputFilePath)
+
+    root = Tk()
+    root.title("EpickiKonwerter GUI")
+    root.geometry("400x500+100+100") # Default window's size and position.
+    gui = layout(root)
+    root.mainloop()
+
