@@ -148,7 +148,7 @@ if __name__ == "__main__":
             inputFilePath = str(self.inFilePath.get())
             outputFilePath = str(self.outFilePath.get())
             e = EpickiKonwerter.EpickiKonwerter()
-# Input -> Converter
+# Input - Converter
             if self.v.get() == 1:
                 e.readFASTA(inputFilePath)
             elif self.v.get() == 2:
@@ -156,9 +156,9 @@ if __name__ == "__main__":
             elif self.v.get() == 3:
                 e.readSAM(inputFilePath)
             elif self.v.get() == 4:
-                e.readGFF2(inputFilePath)
+                e.readGFF2_GFF3(inputFilePath)
             elif self.v.get() == 5:
-                e.readGFF3(inputFilePath)
+                e.readGFF2_GFF3(inputFilePath)
 # Converter -> Output
             if self.v2.get() == 1:
                 e.writeFASTA(outputFilePath)
