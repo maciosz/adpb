@@ -380,20 +380,57 @@ class EpickiKonwerter:
 		self.save_file(filename, out)
 
     
-	def filterGFF(self, filename_in, filename_out, column, value):
+	def filterGFF(self, filename_in, filename_out, phrase):
 		"""
-		Simple filter.
+		Filters gffs files using eval.
 		"""
 		data = self.open_file(filename_in)
 		out = [] 
 		line = ""
+		headline = 0
               
 		for i in data:
 			if i.startswith("#"):
 				out.append(i)
+				headline += 1
 			else:
 				line = i.strip().split("\t") 
-				if line[column-1] == value:
-					out.append(i)
+
+				SEQID = line[0]
+				SOURCE = line[1]
+				METHOD = line[2]
+                
+				try:
+					START = int(line[3])
+				except:
+					START = line[3]
+				try:
+					END = int(line[4])
+				except:
+					END = line[4]
+				try:
+					SCORE = int(line[5])
+				except:
+					SCORE = line[5]
+
+				STRAND = line[6]
+                
+				try:
+					PHASE = int(line[7])
+				except:
+					PHASE = line[7]
+		    
+				ATTRIBUTES = line[8]
+ 
+				try:
+					if eval(phrase):
+						out.append(i)
+				except:
+					pass
+
+
+		print str(len(out) - headline) + " lines written to output file.\n"
         
 		self.save_file(filename_out, out)
+        
+        
