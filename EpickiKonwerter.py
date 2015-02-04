@@ -24,6 +24,9 @@ class EpickiKonwerter:
 		self.quality = []
 
 	def openFile( self, filename ):
+		"""
+		Opens file, return list of lines.
+		"""
 		try:
 			return open( filename ).readlines()
 		except IOError:
@@ -31,6 +34,9 @@ class EpickiKonwerter:
 
 
 	def readFASTA( self, filename ):
+		"""
+		Reads file in FASTA format.
+		"""
 		
 		lines = self.openFile( filename )
 		for line in lines:
@@ -42,6 +48,9 @@ class EpickiKonwerter:
 
 
 	def splitSequence( self, sequence, length=80 ):
+		"""
+		Splits sequence into list of sequences of given length.
+		"""
 		list_of_sequences = []
 		i = -1
 		for i in xrange( len(sequence) / length ):
@@ -52,12 +61,18 @@ class EpickiKonwerter:
 
 
 	def getIthAttribute( self, i, list_of_attributes, default = ''):
+		"""
+		Returns i-th element of list_of_attributes, default if i-th element doesn't exist.
+		"""
 		try:
 			return list_of_attributes[i]
 		except IndexError:
 			return default
 
 	def writeFASTA( self, filename ):
+		"""
+		Writes file in FASTA format.
+		"""
 		output = open( filename, 'w' )
 		for i, sequence in enumerate( self.sequences ):
 			description = self.getIthAttribute(i, self.descriptions)
@@ -68,6 +83,9 @@ class EpickiKonwerter:
 
 
 	def readFASTQ( self, filename ):
+		"""
+		Reads file in FASTQ format.
+		"""
 		lines = self.openFile( filename )
 		for i in xrange( 0, len(lines), 4 ):
 			self.descriptions.append( lines[i][1:].strip() )
@@ -76,6 +94,9 @@ class EpickiKonwerter:
 
 
 	def writeFASTQ( self, filename ):
+		"""
+		Writes file in FASTQ format.
+		"""
 		output = open( filename, 'w' )
 		for i, sequence in enumerate( self.sequences ):
 			description = self.getIthAttribute(i, self.descriptions)
