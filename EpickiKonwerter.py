@@ -88,9 +88,12 @@ class EpickiKonwerter:
 		"""
 		lines = self.openFile( filename )
 		for i in xrange( 0, len(lines), 4 ):
-			self.descriptions.append( lines[i][1:].strip() )
-			self.sequences.append( lines[i+1].strip() )
-			self.scores.append( lines[i+3].strip() )
+			if lines[i][0] == "@" and lines[i+2][0] == '+':
+				self.descriptions.append( lines[i][1:].strip() )
+				self.sequences.append( lines[i+1].strip() )
+				self.scores.append( lines[i+3].strip() )
+			else:
+				print "File " + filename + " seems not to be in FASTQ format."
 
 
 	def writeFASTQ( self, filename ):
