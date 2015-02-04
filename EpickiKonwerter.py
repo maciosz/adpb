@@ -112,7 +112,45 @@ class EpickiKonwerter:
 				self.CIGAR.append( col[5] )
 				self.sequences.append( col[9] )
 				self.quality.append( col[10] )
-				self.descriptions.append( col[11] )
+
+				source = "*"
+				if len( col ) == 10:
+					desc = ''
+				elif len( col ) == 11:
+					desc = col[11]
+				else:
+					desc = ' '.join( col[11:] )
+
+				source = "*"
+				method = "*"
+				score = "."
+				strand = "."
+				phase = "."
+				group_gff = "*"
+				if re.search( "CT", desc ):
+					tmp = re.findall( "[.+/-];[A-Za-z0-9|%]+;", desc ).split( ";" )
+					if tmp:
+						strand = tmp[0]
+						method = tmp[1]
+
+					tmp = re.findall( "FSource=[A-Za-z0-9|%_\-]+;", desc )
+					if tmp: source = tmp[0].split("=")[1][:-1]
+
+					tmp = re.findall( "FScore=[0-9.]+;", desc )
+					if tmp: score = tmp[0].split("=")[1][:-1]
+
+					tmp = re.findall( "FPhase=[A-Za-z0-9|%_\-]+;", desc )
+					if tmp: phase = tmp[0].split("=")[1][:-1]
+
+					desc = "".join( re.split( "CT[A-Za-z0-9%|_\-.+:?$^&*@]+", desc ) )
+
+				self.sources.append( source )
+				self.methods.append( method )
+				self.scores.append( score )
+				self.strands.append( strand )
+				self.phases.append( phase )
+				self.group_gff( group_gff )
+				self.descriptions.append( desc )
 
 
 	def writeSAM( self, filename ):
@@ -143,7 +181,7 @@ class EpickiKonwerter:
 			cigar = '*'
 			quality = '*'
 			tags = ''
-			for i in xrange( len( self.sequences ) ):
+			for i in xrange( max( len( self.seqIDs ), len( self.sequences ) ) ):
 				if self.seqIDs: seqID = self.seqIDs[i]
 				else: seqID = 'seq%d' % i
 				if self.references: ref = self.references[i]
@@ -151,8 +189,26 @@ class EpickiKonwerter:
 				if self.MAPQ: mapq = self.MAPQ[i]
 				if self.CIGAR: cigar = self.CIGAR[i]
 				if self.quality: quality = self.quality[i]
-				if self.descriptions: tags = self.descriptions[i]
-				writer.writerow( [seqID, '*', ref, start, 	mapq, cigar, '*', '*', '*', self.sequences[i], quality, tags] )
+				if self.descriptions:
+					tags = self.descriptions[i]
+
+				if self.strands and self.methods:
+					tmp = "CT:"
+					tmp = tmp + self.strands[i] + ";" + self.methods[i]
+					if self.scores:
+						tmp = tmp + ";FScore=" + self.scores[i]
+
+					if self.sources:
+						tmp = tmp + ";FSource=" + self.sources[i]
+
+					if self.phases:
+						tmp = tmp + ";FPhase=" + self.phases[i]
+
+					tags = tmp + " " + tags
+
+				writer.writerow( [seqID, '*', ref, start, mapq, cigar, \
+						  '*', '*', '*', self.sequences[i], \
+						  quality, tags] )
 
 
 	def filterSAM( self, infilename, outfilename, expression ):
@@ -179,11 +235,9 @@ class EpickiKonwerter:
 					SEQ = col[9]
 					QUAL = col[10]
 
-					#if condition is not met drop the line
-					if not eval( expression ):
-						continue
-
-				out.write( line )
+					#if condition is met write the line
+					if eval( expression ):
+						out.write( line )
 
 
 	def splitSAM( self, infilename ):
@@ -280,7 +334,7 @@ class EpickiKonwerter:
 					 self.phases.append(line[7])
             
 				temp = []
-				 for j in range(8, len(line)):
+				for j in range(8, len(line)):
 					if self.headline[0] == "##gff-version 3\n":
 						line[j] = line[j].split("=")
 					else:
@@ -328,7 +382,7 @@ class EpickiKonwerter:
 							if (re.search(" ", self.group_gff[i][k+1]) != None) or (re.search("_", self.group_gff[i][k+1]) != None):
 								self.group_gff[i][k+1] = "\"" + self.group_gff[i][k+1] + "\""
 						line += self.group_gff[i][k] + " "
-				 else:
+				else:
 					line += verse[j][i] + "\t"
 
 			out.append(line+"\n")
