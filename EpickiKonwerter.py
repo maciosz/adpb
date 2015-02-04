@@ -23,8 +23,16 @@ class EpickiKonwerter:
 		self.CIGAR = []
 		self.quality = []
 
+	def openFile( self, filename ):
+		try:
+			return open( filename ).readlines()
+		except IOError:
+			print "Can\'t open file " + filename + " for reading."
+
+
 	def readFASTA( self, filename ):
-		lines = open( filename ).readlines()
+		
+		lines = self.openFile( filename )
 		for line in lines:
 			if line.startswith('>'):
 				self.descriptions.append( line[1:].strip() )
@@ -35,6 +43,7 @@ class EpickiKonwerter:
 
 	def splitSequence( self, sequence, length=80 ):
 		list_of_sequences = []
+		i = -1
 		for i in xrange( len(sequence) / length ):
 			list_of_sequences.append( sequence[ i*length : (i+1)*length ] )
 		if len(sequence) % length != 0:
@@ -42,17 +51,24 @@ class EpickiKonwerter:
 		return list_of_sequences
 
 
+	def getIthAttribute( self, i, list_of_attributes, default = ''):
+		try:
+			return list_of_attributes[i]
+		except IndexError:
+			return default
+
 	def writeFASTA( self, filename ):
 		output = open( filename, 'w' )
 		for i, sequence in enumerate( self.sequences ):
-			output.write( '>' + self.descriptions[i] + '\n' )
+			description = self.getIthAttribute(i, self.descriptions)
+			output.write( '>' + description + '\n' )
 			sequences_to_write = '\n'.join( self.splitSequence(sequence) )
 			output.write( sequences_to_write )
 			output.write('\n')
 
 
 	def readFASTQ( self, filename ):
-		lines = open( filename ).readlines()
+		lines = self.openFile( filename )
 		for i in xrange( 0, len(lines), 4 ):
 			self.descriptions.append( lines[i][1:].strip() )
 			self.sequences.append( lines[i+1].strip() )
@@ -62,10 +78,12 @@ class EpickiKonwerter:
 	def writeFASTQ( self, filename ):
 		output = open( filename, 'w' )
 		for i, sequence in enumerate( self.sequences ):
-			output.write( '@' + self.descriptions[i] + '\n' )
+			description = self.getIthAttribute(i, self.descriptions)
+			output.write( '@' + description + '\n' )
 			output.write( sequence + '\n' )
 			output.write( '+\n' )
-			output.write( self.scores[i] + '\n' )
+			score = self.getIthAttribute( i, self.scores)
+			output.write( score + '\n' )
 
 
 
@@ -280,7 +298,7 @@ class EpickiKonwerter:
 					 self.phases.append(line[7])
             
 				temp = []
-				 for j in range(8, len(line)):
+				for j in range(8, len(line)):
 					if self.headline[0] == "##gff-version 3\n":
 						line[j] = line[j].split("=")
 					else:
@@ -328,7 +346,7 @@ class EpickiKonwerter:
 							if (re.search(" ", self.group_gff[i][k+1]) != None) or (re.search("_", self.group_gff[i][k+1]) != None):
 								self.group_gff[i][k+1] = "\"" + self.group_gff[i][k+1] + "\""
 						line += self.group_gff[i][k] + " "
-				 else:
+				else:
 					line += verse[j][i] + "\t"
 
 			out.append(line+"\n")
