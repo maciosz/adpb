@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# GUI (jeszcze) bez opcji filtrowania 
+
 import EpickiKonwerter
 import sys
 import os
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 	    self.v.set(1)  # Initializing the input choice
 
             input_format = [
-		("fast",1),
+		("fasta",1),
 		("fastq",2),
 		("sam",3),
 		("gff2",4),
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             self.v2.set(1)  # Initializing the output choice
 
             output_format = [
-		("fast",1),
+		("fasta",1),
 		("fastq",2),
 		("sam",3),
 		("gff2",4),
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
 # Separator (start)
             sep = Frame(parent, width=2, bd=2, bg='grey')
-            sep.pack(fill=X, expand=1)    
+            sep.pack(fill=X, expand=1)       
 # Separator (end)
 
 # Input file section.
@@ -114,7 +114,50 @@ if __name__ == "__main__":
             sep.pack(fill=X, expand=1)    
 # Separator (end)
 
-# "Convert" section
+# Choose Filter (yes/no) section.
+            self.frmFYNform = Frame(parent, bd=5)
+            self.frmFYNform.pack() 
+
+	    self.v3 = IntVar()
+
+            Label(self.frmFYNform, 
+		text="Do you want to use filters?",
+		justify = LEFT,
+		padx = 20).pack(anchor=W)
+            Radiobutton(self.frmFYNform, 
+		text="Yes",
+		padx = 20, 
+		variable=self.v3, 
+		value=True).pack(anchor=W)
+            Radiobutton(self.frmFYNform, 
+		text="No",
+		padx = 20, 
+		variable=self.v3, 
+		value=False).pack(anchor=W)
+
+# Separator (start)
+            sep = Frame(parent, width=2, bd=2, bg='grey')
+            sep.pack(fill=X, expand=1)    
+# Separator (end)
+
+
+# Filter section.
+            self.frmFilt = Frame(parent, bd=5)
+            self.frmFilt.pack()
+
+            self.labelFilt = Label(self.frmFilt, text='Type prefered filter.\n', width=30)
+            self.labelFilt.pack(side=LEFT) 
+
+            self.userexp = StringVar()
+            self.boxExp = Entry(self.frmFilt, width=22, textvariable=self.userexp)
+            self.boxExp.pack(side=LEFT) 
+
+# Separator (start)
+            sep = Frame(parent, width=2, bd=2, bg='grey')
+            sep.pack(fill=X, expand=1)    
+# Separator (end)
+
+# "Convert" button section
             self.frmConv = Frame(parent, bd=5)
             self.frmConv.pack()
 
@@ -147,8 +190,9 @@ if __name__ == "__main__":
         def bConverterClick(self):
             inputFilePath = str(self.inFilePath.get())
             outputFilePath = str(self.outFilePath.get())
+            expression = str(self.userexp.get())
             e = EpickiKonwerter.EpickiKonwerter()
-# Input - Converter
+# Input -> Converter
             if self.v.get() == 1:
                 e.readFASTA(inputFilePath)
             elif self.v.get() == 2:
@@ -159,6 +203,11 @@ if __name__ == "__main__":
                 e.readGFF2_GFF3(inputFilePath)
             elif self.v.get() == 5:
                 e.readGFF2_GFF3(inputFilePath)
+# Filter 
+            if self.v3.get() == True:
+                e.filter(expression)
+            else:
+                pass
 # Converter -> Output
             if self.v2.get() == 1:
                 e.writeFASTA(outputFilePath)
@@ -167,13 +216,22 @@ if __name__ == "__main__":
             elif self.v2.get() == 3:
                 e.writeSAM(outputFilePath)
             elif self.v2.get() == 4:
-                e.writeGFF2(outputFilePath)
+                if self.v.get() == 1:
+                    print "Invalid conversion. Change of input or output file."
+                elif self.v.get() == 2:
+                    print "Invalid conversion. Change type of input or output file." 
+                else:
+                    e.writeGFF2(outputFilePath)
             elif self.v2.get() == 5:
-                e.writeGFF3(outputFilePath)
+                if self.v.get() == 1:
+                    print "Invalid conversion. Changepe of input or output file."
+                elif self.v.get() == 2:
+                    print "Invalid conversion. Change type of input or output file." 
+                else:
+                    e.writeGFF3(OutputFilePath)
 
     root = Tk()
     root.title("EpickiKonwerter GUI")
-    root.geometry("400x500+100+100") # Default window's size and position.
+    root.geometry("400x700+100+40") # Default window's size and position.
     gui = layout(root)
     root.mainloop()
-
