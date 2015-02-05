@@ -23,22 +23,23 @@ class EpickiKonwerter:
 		self.CIGAR = []
 		self.quality = []
 
+	"""
 	def openFile( self, filename ):
-		"""
-		Opens file, return list of lines.
-		"""
+	"""
+	#	Opens file, return list of lines.
+	"""
 		try:
 			return open( filename ).readlines()
 		except IOError:
 			print "Can\'t open file " + filename + " for reading."
-
+	"""
 
 	def readFASTA( self, filename ):
 		"""
 		Reads file in FASTA format.
 		"""
 		
-		lines = self.openFile( filename )
+		lines = self.open_file( filename )
 		for line in lines:
 			if line.startswith('>'):
 				self.descriptions.append( line[1:].strip() )
@@ -86,7 +87,7 @@ class EpickiKonwerter:
 		"""
 		Reads file in FASTQ format.
 		"""
-		lines = self.openFile( filename )
+		lines = self.open_file( filename )
 		for i in xrange( 0, len(lines), 4 ):
 			if lines[i][0] == "@" and lines[i+2][0] == '+':
 				self.descriptions.append( lines[i][1:].strip() )
@@ -109,6 +110,18 @@ class EpickiKonwerter:
 			score = self.getIthAttribute( i, self.scores)
 			output.write( score + '\n' )
 
+
+	def filterFASTA( self, infilename, outfilename, minimum, maximum ):
+		def checkLength( i ):
+			length = len( self.sequences[i] )
+			return length >= minimum and length <= maximum
+		self.readFASTA( infilename )
+		for list_of_attributes in vars(self):
+			if list_of_attributes == 'sequences':
+				continue
+			vars(self)[list_of_attributes] = filter( lambda x: checkLength(vars(self)[list_of_attributes].index(x)), vars(self)[list_of_attributes] )
+		self.sequences = filter( lambda sequence: len(sequence) >=minimum and len(sequence) <= maximum, self.sequences )
+		self.writeFASTA( outfilename )
 
 
 
@@ -529,4 +542,5 @@ class EpickiKonwerter:
         
 		self.save_file(filename_out, out)
         
-        
+       
+
