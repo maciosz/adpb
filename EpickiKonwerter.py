@@ -110,20 +110,53 @@ class EpickiKonwerter:
 			score = self.getIthAttribute( i, self.scores)
 			output.write( score + '\n' )
 
+	def filterFASTA( self, infilename, outfilename, length_range ):
+		"""
+		Reads file in FASTA format and filters out sequences outside the given range
+		(given in format "10:100", 0 for unlimited ("0:100" means no longer than 100, "30:0" means no shorter than 30)),
+		then writes to FASTA file
+		"""
+		minimum, maximum = interpretLengthRange( length_range )
+		filterFASTAOrFASTQ( self, infilename, outfilename, minimum, maximum, "FASTA")
+	
+	def filterFASTQ( self, infilename, outfilename, length_range ):
+		"""
+		Reads file in FASTQ format and filters out sequences outside the given range
+		(given in format "10:100", 0 for unlimited ("0:100" means no longer than 100, "30:0" means no shorter than 30)),
+		then writes to FASTQ file
+		"""
+		minimum, maximum = interpretLengthRange( length_range )
+		filterFASTAOrFASTQ( self, infilename, outfilename, minimum, maximum, "FASTQ")
 
-	def filterFASTA( self, infilename, outfilename, minimum, maximum ):
+	def interpretLengthRange( length_range ):
+		minimum, maximum = length_range.split(':')
+		if maximum = 0:
+			maximum = 'a'
+		return minimum, maximum
+
+
+
+	def filterFASTAOrFASTQ( self, infilename, outfilename, minimum, maximum, fileformat ):
 		def checkLength( i ):
 			length = len( self.sequences[i] )
 			return length >= minimum and length <= maximum
-		self.readFASTA( infilename )
+		if fileformat == "FASTA":
+			self.readFASTA( infilename )
+		if fileformat == "FASTQ":
+			self.readFASTQ( infilename )
 		for list_of_attributes in vars(self):
 			if list_of_attributes == 'sequences':
 				continue
 			vars(self)[list_of_attributes] = filter( lambda x: checkLength(vars(self)[list_of_attributes].index(x)), vars(self)[list_of_attributes] )
 		self.sequences = filter( lambda sequence: len(sequence) >=minimum and len(sequence) <= maximum, self.sequences )
-		self.writeFASTA( outfilename )
+		if fileformat == "FASTA":
+			self.writeFASTA( outfilename )
+		if fileformat == "FASTQ":
+			self.writeFASTQ( outfilename )
 
 
+
+	
 
 	def readSAM( self, filename ):
 		"""Method for reading sequence data from .sam files."""
