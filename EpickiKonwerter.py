@@ -130,7 +130,7 @@ class EpickiKonwerter:
 
 	def interpretLengthRange( length_range ):
 		minimum, maximum = length_range.split(':')
-		if maximum = 0:
+		if maximum == 0:
 			maximum = 'a'
 		return minimum, maximum
 
