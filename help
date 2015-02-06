@@ -1,0 +1,30 @@
+To filter your input file, check "Yes" box below the question "Do you want to use filters" and write appropriate expression in the field "Type prefered filter".
+You should write any expression that will return True or False for every object described in your file.
+These are the variables you can use:
+- sequences - string representing sequence
+- seqIDs - string representing sequence's ID
+- references - string representing reference chromosomes
+- refURIs - ?
+- refLens - dictionary containing lengths of reference chromosomes (as strings)
+- sources - ?
+- methods - ?
+- starts - integer, start of the sequence
+- stops - integer, end of the sequence
+- scores - ?
+- strands - strand of the sequence, single char ('+' / '-' / '.')
+- phases - ?
+- groups - ?
+- group_gff - ?
+- descriptions - string with description of the sequence
+- MAPQ - string
+- CIGAR - string?...
+- quality - string, quality of mapping
+
+For example, expression 'descriptions == "a thaliana"' will leave only sequences which description is "a thaliana".
+You can also use python functions, so for examle expression
+	len(sequences) >= 30 and len(sequences) <= 100
+will filter out all the sequences shorter than 30 and longer than 100, and
+	"AACTG" in sequences or descriptions.startswith("Mus musculus")
+will leave only sequences containing "AACTG" or those which descriptions starts with "Mus musculus".
+
+Bear in mind that not all of attributes described above are present in every format.
