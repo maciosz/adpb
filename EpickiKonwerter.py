@@ -161,7 +161,7 @@ class EpickiKonwerter:
 	def readSAM( self, filename ):
 		"""Method for reading sequence data from .sam files."""
 		for line in open( filename ).readlines():
-			if line.strip() != '':
+			if line.strip() == '':
 				continue
 
 			col = line.strip().split( '\t' )
@@ -237,7 +237,7 @@ class EpickiKonwerter:
 				self.scores.append( score )
 				self.strands.append( strand )
 				self.phases.append( phase )
-				self.group_gff( group_gff )
+				self.group_gff.append( group_gff )
 				self.descriptions.append( desc )
 
 
@@ -293,6 +293,9 @@ class EpickiKonwerter:
 						tmp = tmp + ";FPhase=" + self.phases[i]
 
 					tags = tmp + " " + tags
+
+				print "sekwencja nr ", i, " wyglada tak: "
+				print self.sequences[i]
 
 				writer.writerow( [seqID, '*', ref, start, mapq, cigar, \
 						  '*', '*', '*', self.sequences[i], \
@@ -581,7 +584,7 @@ class EpickiKonwerter:
 		for name_of_attribute in vars(self):
 			if len( vars(self)[ name_of_attribute ] ) != 0:
 				if name_of_attribute == "refURI" or name_of_attribute == "refLen":
-					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][ seqID[i] ]
+					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][ self.seqID[i] ]
 				else:
 					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][i]
 		return variables
@@ -603,6 +606,8 @@ class EpickiKonwerter:
 		for list_of_attributes in vars( self ).values():
 			if len( list_of_attributes ) > 0:
 				for which_object in which_objects_dont_match:
+					if type(list_of_attributes) == dict:
+						which_object = self.seqID[ which_object ]
 					list_of_attributes.pop( which_object )
 
 			
