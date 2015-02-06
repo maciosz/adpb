@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import EpickiKonwerter
+import pops
 import sys
 import os
 from Tkinter import *
@@ -192,6 +193,7 @@ if __name__ == "__main__":
             outputFilePath = str(self.outFilePath.get())
             expression = str(self.userexp.get())
             e = EpickiKonwerter.EpickiKonwerter()
+            m = pops.format_error()
 # Input -> Converter
             if self.v.get() == 1:
                 e.readFASTA(inputFilePath)
@@ -217,16 +219,16 @@ if __name__ == "__main__":
                 e.writeSAM(outputFilePath)
             elif self.v2.get() == 4:
                 if self.v.get() == 1:
-                    print "Invalid conversion. Change of input or output file."
+                    m()
                 elif self.v.get() == 2:
-                    print "Invalid conversion. Change type of input or output file." 
+                    m()
                 else:
                     e.writeGFF2(outputFilePath)
             elif self.v2.get() == 5:
                 if self.v.get() == 1:
-                    print "Invalid conversion. Changepe of input or output file."
+                    m()
                 elif self.v.get() == 2:
-                    print "Invalid conversion. Change type of input or output file." 
+                    m()
                 else:
                     e.writeGFF3(OutputFilePath)
 
