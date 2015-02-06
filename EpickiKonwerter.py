@@ -128,7 +128,7 @@ class EpickiKonwerter:
 		minimum, maximum = interpretLengthRange( length_range )
 		filterFASTAOrFASTQ( self, infilename, outfilename, minimum, maximum, "FASTQ")
 
-	def interpretLengthRange( length_range ):
+	def interpretLengthRange( self, length_range ):
 		minimum, maximum = length_range.split(':')
 		if maximum == 0:
 			maximum = 'a'
@@ -574,6 +574,39 @@ class EpickiKonwerter:
 		print str(len(out) - headline) + " lines written to output file.\n"
         
 		self.save_file(filename_out, out)
-        
-       
+
+
+	def makeDictionaryOfAttributes( self, i ):
+		variables = {}
+		for name_of_attribute in vars(self):
+			if len( vars(self)[ name_of_attribute ] ) != 0:
+				if name_of_attribute == "refURI" or name_of_attribute == "refLen":
+					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][ seqID[i] ]
+				else:
+					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][i]
+		return variables
+
+	def checkWhichObjectsMatch( self, expression ):
+		which_objects_dont_match = []
+		length = max( [ len( list_of_attributes ) for list_of_attributes in vars(self).items() ] )
+		for i in xrange( length ):
+			variables = self.makeDictionaryOfAttributes( i )
+			does_object_matches = eval(expression, variables) 
+			if not does_object_matches:
+				which_objects_dont_match.append(i)
+		return which_objects_dont_match
+
+
+	def filter(self, expression):
+		which_objects_dont_match = self.checkWhichObjectsMatch( expression )
+		which_objects_dont_match.sort( reverse = True )
+		for list_of_attributes in vars( self ).values():
+			if len( list_of_attributes ) > 0:
+				for which_object in which_objects_dont_match:
+					list_of_attributes.pop( which_object )
+
+			
+
+
+
 
