@@ -599,6 +599,9 @@ class EpickiKonwerter:
 
 
 	def filter(self, expression):
+		"""
+		Filters sequences according to given expression.
+		"""
 		which_objects_dont_match = self.checkWhichObjectsMatch( expression )
 		which_objects_dont_match.sort( reverse = True )
 		for list_of_attributes in vars( self ).values():
