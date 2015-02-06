@@ -294,8 +294,6 @@ class EpickiKonwerter:
 
 					tags = tmp + " " + tags
 
-				print "sekwencja nr ", i, " wyglada tak: "
-				print self.sequences[i]
 
 				writer.writerow( [seqID, '*', ref, start, mapq, cigar, \
 						  '*', '*', '*', self.sequences[i], \
