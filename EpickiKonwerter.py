@@ -22,6 +22,7 @@ class EpickiKonwerter:
 		self.MAPQ = []
 		self.CIGAR = []
 		self.quality = []
+		self.headline = []
 
 	"""
 	def openFile( self, filename ):
@@ -195,7 +196,7 @@ class EpickiKonwerter:
 				self.seqIDs.append( col[0] )
 				self.references.append( col[2] )
 				self.starts.append( col[3] )
-				self.stops.append( max( [sum( [int( i ) for i in re.findall( '\d+', col[5] )]+[0] ), len( col[9] )] ) )
+				self.stops.append( str( max( [sum( [int( i ) for i in re.findall( '\d+', col[5] )]+[0] ), len( col[9] )] ) ) )
 				self.MAPQ.append( col[4] )
 				self.CIGAR.append( col[5] )
 				self.sequences.append( col[9] )
@@ -282,15 +283,15 @@ class EpickiKonwerter:
 
 				if self.strands and self.methods:
 					tmp = "CT:"
-					tmp = tmp + self.strands[i] + ";" + self.methods[i]
+					tmp = tmp + self.strands[i] + ";" + self.methods[i] + ";"
 					if self.scores:
-						tmp = tmp + ";FScore=" + self.scores[i]
+						tmp = tmp + "FScore=" + self.scores[i] + ";"
 
 					if self.sources:
-						tmp = tmp + ";FSource=" + self.sources[i]
+						tmp = tmp + "FSource=" + self.sources[i] + ";"
 
 					if self.phases:
-						tmp = tmp + ";FPhase=" + self.phases[i]
+						tmp = tmp + "FPhase=" + self.phases[i] + ";"
 
 					tags = tmp + " " + tags
 
@@ -305,7 +306,7 @@ class EpickiKonwerter:
 		meeting criteria in a given expression."""
 		with open( outfilename, 'w' ) as out:
 			for line in open( infilename ).readlines():
-				if line.strip() != '':
+				if line.strip() == '':
 					continue
 
 				col = line.strip().split( '\t' )
@@ -324,9 +325,11 @@ class EpickiKonwerter:
 					SEQ = col[9]
 					QUAL = col[10]
 
-					#if condition is met write the line
-					if eval( expression ):
-						out.write( line )
+					#if condition is not met drop the line
+					if not eval( expression ):
+						continue
+
+				out.write( line )
 
 
 	def splitSAM( self, infilename ):
@@ -339,7 +342,7 @@ class EpickiKonwerter:
 		basename = infilename.split( '.sam' )[0]
 
 		for line in open( infilename ).readlines():
-			if line.strip() != '':
+			if line.strip() == '':
 				continue
 
 			col = line.strip().split( '\t' )
