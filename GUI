@@ -158,12 +158,16 @@ if __name__ == "__main__":
             sep.pack(fill=X, expand=1)    
 # Separator (end)
 
-# "Convert" button section
+# "Convert" and "Help" button section
             self.frmConv = Frame(parent, bd=5)
             self.frmConv.pack()
 
-            self.bConverter = Button(self.frmConv, text='Convert', command=self.bConverterClick)
-            self.bConverter.pack() 
+            self.bConverter = Button(self.frmConv, text='Convert', command=self.bConverterClick) 
+
+            self.bHelp = Button(self.frmConv, text='Display Help', command=self.bHelpClick)
+
+	    self.bConverter.grid(row=0,column=1, sticky=W)
+	    self.bHelp.grid(row=0,column=0, sticky=W)
 
 # Browse input_file button
         def bBrowseInClick(self):             
@@ -186,6 +190,10 @@ if __name__ == "__main__":
 		title='select a file') 
             self.outFilePath.set(rFilepath)
             print self.boxOut.get()
+            
+# "Help" button  
+        def bHelpClick(self):
+            print 'help'       
         
 # "Convert" button   
         def bConverterClick(self):
