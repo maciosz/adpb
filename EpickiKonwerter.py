@@ -584,8 +584,9 @@ class EpickiKonwerter:
 		variables = {}
 		for name_of_attribute in vars(self):
 			if len( vars(self)[ name_of_attribute ] ) != 0:
-				if name_of_attribute == "refURI" or name_of_attribute == "refLen":
-					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][ self.seqID[i] ]
+				if name_of_attribute == "refURIs" or name_of_attribute == "refLens":
+					#variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][ self.seqIDs[i] ]
+					pass
 				else:
 					variables[ name_of_attribute ] = vars(self)[ name_of_attribute ][i]
 		return variables
